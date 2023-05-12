@@ -1,41 +1,32 @@
-const Spaceship = require ("../models/Spaceship");
+const Spaceship = require("../models/Spaceship");
+const Cap = require("../models/Cap");
 
 module.exports = {
-    async store (req, res) {
-        const { name, serial_number, capacity } = req.body;
+  async store(req, res) {
+    const { capId } = req.params;
+    const { name, serial_number, capacity } = req.body;
 
-        const spaceship = await Spaceship.create({ name, serial_number, capacity });
-        return res.json(spaceship);
-    },
+    const cap = await Cap.findByPk(capId);
 
-    async index(req, res) {
-        const spaceships = await Spaceship.findAll();
-
-        return res.json(spaceships);
-    },
-
-    async put (req, res) {
-        const {name, serial_number, capacity } = req.body;
-        await Spaceship.update (
-            {name, serial_number, capacity },
-            {
-                where: {
-                    id: req.params.id,
-                },
-            },
-        );
-        return res.send("Nave atualizada seu corno")
-    },
-
-    async delete (req, res) {
-        await Spaceship.destroy (
-            {
-                where: {
-                    id: req.params.id,
-                },
-            },
-        );
-        return res.send("Nave eliminada seu corno")
+    if (!cap) {
+      res.send("Error, this cap does not exist!");
     }
 
+    const [spaceships] = await Spaceship.findOrCreate({
+      where: { name, serial_number, capacity },
+    });
+
+    await caps.addSpaceship(spaceships);
+
+    return res.json(spaceships);
+  },
+  async index(req, res) {
+    const { capId } = req.params;
+
+    const cap = await Cap.findByPk(capId, {
+      include: { association: "spaceships" },
+    });
+
+    return res.json(cap);
+  },
 };
